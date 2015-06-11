@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
   <head>
-    <script type="text/javascript" src="sm2/soundmanager2.js"></script>
-    <script type="text/javascript" src="main.js"></script>
   </head>
   <body>
+    <link rel="stylesheet" href="css/style.css" type="text/css">
     <canvas id="main-canvas"></canvas>
+    <div id="loader">[--LOADER--]</div>
   </body>
+    <script type="text/javascript" src="sm2/soundmanager2.js"></script> <!-- This should before the main.js -->
+    <script type="text/javascript" src="js/machine.js"></script> <!-- This should before the main.js -->
+    <script type="text/javascript" src="main.js"></script>
 </html>

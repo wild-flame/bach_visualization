@@ -1,9 +1,14 @@
 var suite = {};
-TOTAL_NOTES = 38;
+var TOTAL_NOTES = 38;
+var SHOW_FRAMERATE = false;
 
 soundManager.url = "/lib/swf/"
 soundManager.flashVersion = 9;
-soundManager.debugMode = true;
+// soundManager.debugMode = true;
+
+suite.canvasEl = document.getElementById("main-canvas");
+suite.canvasObj = suite.canvasEl.getContext("2d");
+suite.machine = new Machine(suite.canvasObj);
 
 soundManager.onready(function() {
     suite.indNoteLd = 0;
@@ -49,5 +54,7 @@ suite.everythingIsReady = function() {
         return
     }
     suite.ready = true;
-    // suite.machine.doneLoading();
+    suite.machine.doneLoading();
 };
+
+// suite.indNoteLd = 0;
