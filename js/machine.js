@@ -45,7 +45,8 @@ Machine.prototype.build = function() {
         a = a - j;
         this.arrThreads.push(b)
     }
-    // TODO:WHEEL
+    this.wheel0 = new Wheel(WHEEL_RADIUS, 0, 0, this.cv); //第一个wheel
+    this.wheel1 = new Wheel(-WHEEL_RADIUS, 0, 1, this.cv); //第二个weeel
     // TODO:NUBS
 };
     
