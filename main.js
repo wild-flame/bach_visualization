@@ -1,9 +1,11 @@
 var suite = {};
+var UPDATE_INTERVAL = 33;
 var TOTAL_NOTES = 38;
 var MAX_LENGTH = 590;
 var MIN_LENGTH = MAX_LENGTH * Math.pow(HALF_STEP_MULTIPLIER, TOTAL_NOTES - 1);
 var SHOW_FRAMERATE = true;
 var UPDATE_INTERVAL = 33;
+var mouseX = 0, mouseY= 0;
 var MIDI_MAP = {
     "36": 0,
     "37": 1,
@@ -72,6 +74,7 @@ suite.smLoadSound = function(count) {
     sound.ahcInd = count;
 }
 
+
 suite.smLoadedSnd = function(count) { // if audio is loaded
     suite.indNoteLd = count;
     if (suite.indNoteLd >= TOTAL_NOTES - 1) {
@@ -134,13 +137,18 @@ suite.init = function() {
     // suite.indNoteLd = 0;
     rsize();
     suite.machine.build();
-    // suite.machine.beginLoading();
-    // setInterval(updateLoop, UPDATE_INTERVAL);
+    suite.machine.beginLoading();
+    setInterval(updateLoop, UPDATE_INTERVAL);
 };
 
-init = function() {
+var updateLoop = function() {
+    // suite.machine.upd();
+};
+
+var init = function() {
     suite.init();
 }
+
 
 var rsize = function() {
     width = window.innerWidth;
