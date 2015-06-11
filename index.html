@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
   <head>
-  </head>
-  <body>
-    <link rel="stylesheet" href="css/style.css" type="text/css">
-    <canvas id="main-canvas"></canvas>
-    <div id="loader">[--LOADER--]</div>
-  </body>
     <script type="text/javascript" src="sm2/soundmanager2.js"></script> <!-- This should before the main.js -->
+    <script type="text/javascript" src="js/basicMath.js"></script> <!-- This should before the main.js -->
+    <script type="text/javascript" src="js/thread.js"></script> <!-- This should before the main.js -->
+    <script type="text/javascript" src="js/songdata.js"></script> <!-- This should before the main.js -->
     <script type="text/javascript" src="js/machine.js"></script> <!-- This should before the main.js -->
     <script type="text/javascript" src="main.js"></script>
+  </head>
+  <body onload="init()">
+    <link rel="stylesheet" href="css/style.css" type="text/css">
+    <canvas id="main-canvas"></canvas>
+    <div id="loader">Loader</div>
+    <div id="about">About</div>
+  </body>
 </html>

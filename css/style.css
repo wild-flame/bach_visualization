@@ -1,7 +1,13 @@
 #loader {
-    position: absolute:
+    position: absolute;
     font-weight: bold;
     width: 150px;
     // color: #FFFFFF ;
+    font-size: 11px;
+}
+
+#about {
+    position: absolute;
+    font-weight: bold;
     font-size: 11px;
 }
