@@ -4,7 +4,6 @@ var TOTAL_NOTES = 38;
 var MAX_LENGTH = 590;
 var MIN_LENGTH = MAX_LENGTH * Math.pow(HALF_STEP_MULTIPLIER, TOTAL_NOTES - 1);
 var SHOW_FRAMERATE = true;
-var UPDATE_INTERVAL = 33;
 var mouseX = 0, mouseY= 0;
 var MIDI_MAP = {
     "36": 0,
@@ -142,7 +141,7 @@ suite.init = function() {
 };
 
 var updateLoop = function() {
-    // suite.machine.upd();
+    suite.machine.upd();
 };
 
 var init = function() {

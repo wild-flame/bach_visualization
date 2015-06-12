@@ -9,6 +9,14 @@ var WHEEL_RADIUS_SQUARED = Math.pow(WHEEL_RADIUS, 2);
 var WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_RADIUS_SQUARED;
 var WHEEL_QUARTER_SEG = Math.sqrt(2 * WHEEL_RADIUS_SQUARED);
 
+// LOADING 
+var TIME_BETWEEN_LOAD = 0.25;
+var LOAD_TIME_OVERALL = 12.5;
+
+// NOTE_UNIT
+var NOTE_UNIT = 2;
+ 
+
 var Machine = function(canvasObj) {
     this.cv = canvasObj;
 
@@ -77,6 +85,49 @@ Machine.prototype.doneLoading = function() {
     }
 };
 
+Machine.prototype.upd = function() { //update
+    // this.xbMin = this.xbLimitMin;
+    // this.xbMax = this.xbLimitMax;
+    // this.ybMin = this.ybLimitMin;
+    // this.ybMax = this.ybLimitMax;
+    if (SHOW_FRAMERATE) {
+        this.updFramerate();
+    }
+    if (this.isIntro) {
+        this.updLoading();
+    }
+    this.updTime();
+    // this.updPos();
+    this.updWheels(); //update wheels
+    // this.cv.clearRect(this.xo + this.xbMin - CLEAR_RECT_MARG, this.yo + this.ybMin - CLEAR_RECT_MARG, this.xbMax - this.xbMin + CLEAR_RECT_MARG * 2, this.ybMax - this.ybMin + CLEAR_RECT_MARG * 2); //clear screen
+    // this.updateAndRedrawThreads(); //琴弦
+    // this.redrawNubs() //球
+}
+
+Machine.prototype.updFramerate = function() {
+    this.tFrame1 = (new Date).getTime() / 1000;
+    var a = this.tFrame1 - this.tFrame0;
+    this.tFrame0 = this.tFrame1;
+    this.ctFrame++;
+    if(this.ctFrame % 5 == 0) {
+        this.numFrame = Math.round(100 / a) / 100;
+        this.elmLoader.innerHTML = '<span class="loading">' + this.numFrame + "</span> &nbsp; "
+    }
+};
+
+Machine.prototype.updLoading = function() {
+    var c;
+    if (!suite.soundReady) {
+        var a = Math.round(suite.indNoteLd / TOTAL_NOTES * 100);
+        c = "Loading sound (" + a + "%)";
+        this.elmLoader.innerHTML += '<span class="loading">' + c + "</span>"
+    }
+    this.tLoadCurr = (new Date).getTime() / 1000;
+    var b = this.tLoadCurr - this.tLoadPrev;
+    this.rLoad = (this.tLoadCurr - this.tLoading0) / LOAD_TIME_OVERALL;
+    // TODO: this.incrLoad()
+}
+
 Machine.prototype.rsize = function() {
     this.wasResized = true;
     this.width = suite.canvasEl.width = window.innerWidth;
@@ -93,4 +144,45 @@ Machine.prototype.setOrigin = function() {
     this.yo = Math.round(this.height / 2)
 };
 
+Machine.prototype.updTime = function() {
+    this.t1 = (new Date()).getTime() / 1000;
+    this.elapFrame = this.t1 - this.t0;
+    this.t0 = this.t1;
+    var d = 1 / this.elapFrame;
+    this.elapSong = this.t1 - this.tSong0;
+    this.beatSong = this.bps * this.elapSong;
+    this.noteSong = this.beatSong * NOTE_UNIT;
+    this.noteSongRd = Math.floor(this.noteSong);
+    if (this.isIntro) {
+        if (this.noteSongRd != this.noteSongRdPrev) {
+            if (this.isIntroDone) {
+                if ((this.noteSongRdPrev < this.nextNoteBreak) && (this.noteSongRd >= this.nextNoteBreak)) {
+                    var a = this.beatSong % 1;
+                    var b = a / this.bps;
+                    this.tSong0 = this.tNotes0 = this.t1 - b;
+                    this.exitLoading()
+                }
+            }
+            this.noteSongRdPrev = this.noteSongRd
+        }
+    } else {
+        if (this.noteSong > this.indGroup + TOTAL_THREADS) {
+            this.tNotes0 = this.t1;
+            var c = this.indGroup + TOTAL_THREADS;
+            if (c >= TOTAL_NOTES_IN_SONG) {
+                c = 0;
+                this.tSong0 = this.t1
+            }
+            this.setGroup(c)
+        }
+    }
+    this.nextNoteBreak = this.noteSongRd + (32 - (this.noteSongRd % 32))
+};
 
+Machine.prototype.updWheels = function() {
+    var a;
+    this.wheel0.setRot((Math.PI * (0.25 + (this.beatSong % 16) / 16 * 2)) % (2 * Math.PI));
+    this.wheel1.setRot((Math.PI * (0.25 - (this.beatSong % 16) / 16 * 2)) % (2 * Math.PI));
+    this.wheel0.upd();
+    this.wheel1.upd()
+};
