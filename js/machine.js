@@ -15,7 +15,10 @@ var LOAD_TIME_OVERALL = 12.5;
 
 // NOTE_UNIT
 var NOTE_UNIT = 2;
- 
+
+// CLEAR_RECT
+var CLEAR_RECT_MARG = 50;
+
 
 var Machine = function(canvasObj) {
     this.cv = canvasObj;
@@ -27,6 +30,10 @@ var Machine = function(canvasObj) {
 
     this.elmLoader = document.getElementById("loader");
     this.elmAbout = document.getElementById("about");
+
+    this.pt0 = new Point();
+    this.pt1 = new Point();
+
 }
 
 Machine.prototype.init = function() {
@@ -61,7 +68,6 @@ Machine.prototype.build = function() {
     this.arrNubs[3] = this.wheel1.nub1 = new Nub(1, 3, suite.machine, this.wheel1, this.cv); //第四个球
 
     this.arrNubs[0].enter();
-
 };
 
 Machine.prototype.beginLoading = function() {
@@ -97,11 +103,11 @@ Machine.prototype.upd = function() { //update
         this.updLoading();
     }
     this.updTime();
-    // this.updPos();
+    this.updPos();
     this.updWheels(); //update wheels
-    // this.cv.clearRect(this.xo + this.xbMin - CLEAR_RECT_MARG, this.yo + this.ybMin - CLEAR_RECT_MARG, this.xbMax - this.xbMin + CLEAR_RECT_MARG * 2, this.ybMax - this.ybMin + CLEAR_RECT_MARG * 2); //clear screen
-    // this.updateAndRedrawThreads(); //琴弦
-    // this.redrawNubs() //球
+    this.cv.clearRect(this.xo + this.xbMin - CLEAR_RECT_MARG, this.yo + this.ybMin - CLEAR_RECT_MARG, this.xbMax - this.xbMin + CLEAR_RECT_MARG * 2, this.ybMax - this.ybMin + CLEAR_RECT_MARG * 2); //clear screen
+    //this.updateAndRedrawThreads(); //琴弦
+    this.redrawNubs(); //球
 }
 
 Machine.prototype.updFramerate = function() {
@@ -114,6 +120,26 @@ Machine.prototype.updFramerate = function() {
         this.elmLoader.innerHTML = '<span class="loading">' + this.numFrame + "</span> &nbsp; "
     }
 };
+
+Machine.prototype.updPos = function() {
+    this.xp1 = this.getUserX();
+    this.yp1 = this.getUserY();
+    this.xp1 = this.getUserX();
+    this.yp1 = this.getUserY();
+    this.pt0.x = this.xp0;
+    this.pt0.y = this.yp0;
+    this.pt1.x = this.xp1;
+    this.pt1.y = this.yp1;
+    this.dx = this.xp1 - this.xp0;
+    this.dy = this.yp1 - this.yp0;
+    this.dist = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+    // this.isMouseMoving = (this.dist > 0.2);
+    this.spd = this.dist / this.elapFrame;
+    // this.rSpd = lim((this.spd - MOUSE_SPEED_MIN) / (MOUSE_SPEED_MAX - MOUSE_SPEED_MIN), 0, 1);
+    // this.rSpdAvg = (this.rSpdAvg * (this.fAvg - 1) / this.fAvg) + (this.rSpd * (1 / this.fAvg));
+    this.xp0 = this.xp1;
+    this.yp0 = this.yp1
+}
 
 Machine.prototype.updLoading = function() {
     var c;
@@ -154,16 +180,16 @@ Machine.prototype.updTime = function() {
     this.noteSong = this.beatSong * NOTE_UNIT;
     this.noteSongRd = Math.floor(this.noteSong);
     if (this.isIntro) {
-        if (this.noteSongRd != this.noteSongRdPrev) {
-            if (this.isIntroDone) {
-                if ((this.noteSongRdPrev < this.nextNoteBreak) && (this.noteSongRd >= this.nextNoteBreak)) {
-                    var a = this.beatSong % 1;
-                    var b = a / this.bps;
-                    this.tSong0 = this.tNotes0 = this.t1 - b;
-                    this.exitLoading()
-                }
+        //if (this.noteSongRd != this.noteSongRdPrev) {
+        if (this.isIntroDone) {
+            if ((this.noteSongRdPrev < this.nextNoteBreak) && (this.noteSongRd >= this.nextNoteBreak)) {
+                var a = this.beatSong % 1;
+                var b = a / this.bps;
+                this.tSong0 = this.tNotes0 = this.t1 - b;
+                this.exitLoading()
             }
-            this.noteSongRdPrev = this.noteSongRd
+            //		}
+            //	this.noteSongRdPrev = this.noteSongRd
         }
     } else {
         if (this.noteSong > this.indGroup + TOTAL_THREADS) {
@@ -185,4 +211,11 @@ Machine.prototype.updWheels = function() {
     this.wheel1.setRot((Math.PI * (0.25 - (this.beatSong % 16) / 16 * 2)) % (2 * Math.PI));
     this.wheel0.upd();
     this.wheel1.upd()
+};
+
+Machine.prototype.redrawNubs = function() {
+    this.wheel0.nub0.redraw();
+    this.wheel0.nub1.redraw();
+    this.wheel1.nub0.redraw();
+    this.wheel1.nub1.redraw()
 };

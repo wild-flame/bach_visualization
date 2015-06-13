@@ -11,3 +11,8 @@
     font-weight: bold;
     font-size: 11px;
 }
+
+canvas#main-canvas {
+  background: #b02e2e;
+}
+

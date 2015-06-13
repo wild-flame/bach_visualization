@@ -1,6 +1,7 @@
 var RAD_NORM = 6;
+var RAD_EASE = 0.4;
 var ORBIT_LOADER = 35;
-var EASE_ORBIT_LOADER = 0.003;
+var EASE_ORBIT_LOADER = 0.003; // 
 var EASE_CENTER_LOADER = 0.03;
 
 var Nub = function(ind,indAll, machine,wheel, canvas) {
@@ -23,8 +24,12 @@ var Nub = function(ind,indAll, machine,wheel, canvas) {
     this.rad = RAD_NORM;
     // this.radTarg = RAD_NORM;
     // this.scaleRat = 0；
+
     this.velX = 0;
     this.velY = 0;
+
+    this.dampVel = 0.93;
+
     this.hasEntered = false;
 
     this.init();
@@ -32,6 +37,92 @@ var Nub = function(ind,indAll, machine,wheel, canvas) {
 
 Nub.prototype.init = function() {
     this.m = this.machine;
+};
+
+Nub.prototype.upd = function() {
+    if (!this.hasEntered) {
+        return
+    }
+    this.updPos();
+    //TODO: this.updInteract();
+}
+
+Nub.prototype.updPos = function() {
+    this.t1 = (new Date()).getTime() / 1000;
+    var c = this.t1 - this.t0;
+    this.t0 = this.t1;
+    this.velX *= this.dampVel;
+    this.velY *= this.dampVel;
+    if(Math.abs(this.velX) < 0.5) {
+        this.velX = 0;
+    }
+    if(Math.abs(this.velY) < 0.5) {
+        this.velY = 0;
+    }
+    this.xpv = this.xp0 + this.velX;
+    this.ypv = this.yp0 + this.velY;
+    if (this.rad != this.radTarg) {
+        var e = (this.radTarg - this.rad);
+        if(Math.abs(e) < 1) {
+            this.rad = this.radTarg;
+        } else {
+            this.rad += e * RAD_EASE;
+        }
+    }
+    if (Math.abs(this.velX) > 0 || Math.abs(this.velY) > 0) {
+        this.isTossing = true;
+    } else {
+        this.isTossing = false;
+    }
+    if (this.isTossing) {
+        this.setPos(this.xpv, this,ypv);
+        this.xpOrbit = this.xpv;
+        this.ypOrbit = this.ypv;
+        this.orbit = 0;
+    } else {
+        //TODO:Holding nub and mouse over
+        this.xpOrbitTarg = this.wheel.xp;
+        this.ypOrbitTarg = this.wheel.yp;
+        var b = this.orbitTarg;
+        if (this.orbit != b) {
+            this.orbit = (b - this.orbit) * this.easeOrbit + this.orbit; // (b + this.orbit(1-this.easeOrbit)
+            if (Math.abs(this.orbitTarg - this.orbit) < 1) {
+                this.orbit = this.orbitTarg;
+            }
+        }
+        if (this.xpOrbit != this.xpOrbitTarg) {
+            this.xpOrbit += (this.xpOrbitTarg - this.xpOrbit) * this.easeCenter;
+            if (Math.abs(this.xpOrbitTarg - this.xpOrbit) < 1) {
+                this.xpOrbit = this.xpOrbitTarg
+            }
+        }
+        if (this.ypOrbit != this.ypOrbitTarg) {
+            this.ypOrbit += (this.ypOrbitTarg - this.ypOrbit) * this.easeCenter;
+            if (Math.abs(this.ypOrbitTarg - this.ypOrbit) < 1) {
+                this.ypOrbit = this.ypOrbitTarg
+            }
+        }
+        if (this.ind == 0) {
+            this.xpw = this.xpOrbit + this.wheel.cosAng * this.orbit;
+            this.ypw = this.ypOrbit + this.wheel.sinAng * this.orbit
+        } else {
+            this.xpw = this.xpOrbit - this.wheel.cosAng * this.orbit;
+            this.ypw = this.ypOrbit - this.wheel.sinAng * this.orbit
+        }
+        this.setPos(this.xpw, this.ypw);
+    }
+    this.dx = this.xp1 - this.xp0;
+    this.dy = this.yp1 - this.yp0;
+    this.pt0.x = this.xp0;
+    this.pt0.y = this.yp0;
+    this.pt1.x = this.xp1;
+    this.pt1.y = this.yp1;
+    this.xp0 = this.xp1;
+    this.yp0 = this.yp1;
+    this.dist = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+    this.spd = this.dist;
+    //TODO:trail
+    this.frameCt++;
 };
 
 Nub.prototype.enter = function() {
@@ -58,4 +149,27 @@ Nub.prototype.enter = function() {
     this.orbitTarg = WHEEL_RADIUS;
     this.easeOrbit = EASE_ORBIT_LOADER;
     this.easeCenter = EASE_CENTER_LOADER;
+}
+
+Nub.prototype.redraw = function() {
+    if (!this.hasEntered) {
+        return
+    }
+    this.cv.beginPath();
+    this.cv.fillStyle = "#FFFFFF";
+    this.cv.arc(this.xp1 + this.m.xo, this.yp1 + this.m.yo, this.rad, 0, 2 * Math.PI);
+    this.cv.fill();
+    this.cv.closePath();
+    var d, m, c, k, b, h, l, a, j, o, e, n;
+    if (this.machine.isInBackground) {
+        return
+    }
+
+    // TODO:Draw trails
+
+};
+
+Nub.prototype.setPos = function(a, b) {
+    this.xp1 = a;
+    this.yp1 = b;
 }
