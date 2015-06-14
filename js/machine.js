@@ -1,5 +1,5 @@
+
 // THREAD parameters
-var HALF_STEP_MULTIPLIER = 0.94921875;
 var TOTAL_THREADS = 8;
 var NUBS = 4;
 
@@ -8,6 +8,9 @@ var WHEEL_RADIUS = 172;
 var WHEEL_RADIUS_SQUARED = Math.pow(WHEEL_RADIUS, 2);
 var WHEEL_CIRCUMFERENCE = Math.PI * WHEEL_RADIUS_SQUARED;
 var WHEEL_QUARTER_SEG = Math.sqrt(2 * WHEEL_RADIUS_SQUARED);
+
+// 
+var HEIGHT_ALL_THREADS = WHEEL_QUARTER_SEG;
 
 // LOADING 
 var TIME_BETWEEN_LOAD = 0.25;
@@ -18,7 +21,6 @@ var NOTE_UNIT = 2;
 
 // CLEAR_RECT
 var CLEAR_RECT_MARG = 50;
-
 
 var Machine = function(canvasObj) {
     this.cv = canvasObj;
@@ -33,6 +35,17 @@ var Machine = function(canvasObj) {
 
     this.pt0 = new Point();
     this.pt1 = new Point();
+
+    this.setTempo(BPM_NORM);  
+
+    this.xbLimitMin = -MAX_LENGTH * 0.5;
+    this.xbLimitMax = MAX_LENGTH * 0.5;
+    this.ybLimitMin = -HEIGHT_ALL_THREADS * 0.5;
+    this.ybLimitMax = HEIGHT_ALL_THREADS * 0.5;
+    this.xbMin = this.xbLimitMin;
+    this.xbMax = this.xbLimitMax;
+    this.ybMin = this.ybLimitMin;
+    this.ybMax = this.ybLimitMax;
 
 }
 
@@ -77,6 +90,12 @@ Machine.prototype.beginLoading = function() {
     this.yp0 = this.getUserY();
 };
 
+Machine.prototype.doneLoading = function() {
+    if (!SHOW_FRAMERATE) {
+        this.elmLoader.style.display = "none";
+    }
+};
+
 Machine.prototype.getUserX = function() {
     return mouseX - this.xo;
 };
@@ -85,17 +104,16 @@ Machine.prototype.getUserY = function() {
     return mouseY - this.yo;
 };
 
-Machine.prototype.doneLoading = function() {
-    if (!SHOW_FRAMERATE) {
-        this.elmLoader.style.display = "none";
-    }
+Machine.prototype.setTempo = function(a) {
+    this.bpm = a;
+    this.bps = a / 60
 };
 
 Machine.prototype.upd = function() { //update
-    // this.xbMin = this.xbLimitMin;
-    // this.xbMax = this.xbLimitMax;
-    // this.ybMin = this.ybLimitMin;
-    // this.ybMax = this.ybLimitMax;
+    this.xbMin = this.xbLimitMin;
+    this.xbMax = this.xbLimitMax;
+    this.ybMin = this.ybLimitMin;
+    this.ybMax = this.ybLimitMax;
     if (SHOW_FRAMERATE) {
         this.updFramerate();
     }
@@ -105,7 +123,8 @@ Machine.prototype.upd = function() { //update
     this.updTime();
     this.updPos();
     this.updWheels(); //update wheels
-    this.cv.clearRect(this.xo + this.xbMin - CLEAR_RECT_MARG, this.yo + this.ybMin - CLEAR_RECT_MARG, this.xbMax - this.xbMin + CLEAR_RECT_MARG * 2, this.ybMax - this.ybMin + CLEAR_RECT_MARG * 2); //clear screen
+    // this.cv.clearRect(this.xo + this.xbMin - CLEAR_RECT_MARG, this.yo + this.ybMin - CLEAR_RECT_MARG, this.xbMax - this.xbMin + CLEAR_RECT_MARG * 2, this.ybMax - this.ybMin + CLEAR_RECT_MARG * 2); //clear screen
+    this.cv.clearRect(0,0,window.innerWidth,window.innerHeight);
     //this.updateAndRedrawThreads(); //琴弦
     this.redrawNubs(); //球
 }

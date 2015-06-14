@@ -1,10 +1,16 @@
 var suite = {};
 var UPDATE_INTERVAL = 33;
 var TOTAL_NOTES = 38;
+var HALF_STEP_MULTIPLIER = 0.94921875;
+
+var BPM_NORM = 145; //music speed (machine speed)
+
 var MAX_LENGTH = 590;
 var MIN_LENGTH = MAX_LENGTH * Math.pow(HALF_STEP_MULTIPLIER, TOTAL_NOTES - 1);
 var SHOW_FRAMERATE = true;
 var mouseX = 0, mouseY= 0;
+
+
 var MIDI_MAP = {
     "36": 0,
     "37": 1,

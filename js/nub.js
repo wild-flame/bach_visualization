@@ -22,7 +22,7 @@ var Nub = function(ind,indAll, machine,wheel, canvas) {
     this.ypOrbit = this.ypOrbitTarg = this.wheel.yp;
     this.orbit = this.orbitTarg = WHEEL_RADIUS;
     this.rad = RAD_NORM;
-    // this.radTarg = RAD_NORM;
+    this.radTarg = RAD_NORM;
     // this.scaleRat = 0；
 
     this.velX = 0;
