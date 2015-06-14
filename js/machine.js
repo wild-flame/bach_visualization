@@ -47,6 +47,10 @@ var Machine = function(canvasObj) {
     this.ybMin = this.ybLimitMin;
     this.ybMax = this.ybLimitMax;
 
+    this.isIntro = true;
+    this.isIntroDone = false;
+
+
 }
 
 Machine.prototype.init = function() {
@@ -103,6 +107,32 @@ Machine.prototype.getUserX = function() {
 Machine.prototype.getUserY = function() {
     return mouseY - this.yo;
 };
+
+Machine.prototype.incrLoad = function() {
+    var l;
+    if (this.rLoad > 0.15) {
+        l = this.arrNubs[2];
+        if (!l.hasEntered) {
+            l.enter()
+        }
+        l = this.arrNubs[0];
+        if (!l.hasEntered) {
+            l.enter()
+        }
+    }
+    if (this.rLoad > 0.85) {
+        l = this.arrNubs[1];
+        if (!l.hasEntered) {
+            l.enter()
+        }
+    }
+    if (this.rLoad > 0.97) {
+        l = this.arrNubs[3];
+        if (!l.hasEntered) {
+            l.enter()
+        }
+    }
+}
 
 Machine.prototype.setTempo = function(a) {
     this.bpm = a;
@@ -170,7 +200,7 @@ Machine.prototype.updLoading = function() {
     this.tLoadCurr = (new Date).getTime() / 1000;
     var b = this.tLoadCurr - this.tLoadPrev;
     this.rLoad = (this.tLoadCurr - this.tLoading0) / LOAD_TIME_OVERALL;
-    // TODO: this.incrLoad()
+    this.incrLoad();
 }
 
 Machine.prototype.rsize = function() {
