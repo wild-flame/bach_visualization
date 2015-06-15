@@ -1,8 +1,30 @@
 var RAD_NORM = 6;
+// var RAD_OVER = 15;
+// var RAD_GRAB = 10;
 var RAD_EASE = 0.4;
+
 var ORBIT_LOADER = 35;
+
+// var EASE_ORBIT_GRAB = 0.2;
+// var EASE_ORBIT_FOLLOW = 0.02;
+// var EASE_ORBIT_RESTORE = 0.02;
+// var EASE_CENTER_GRAB = 0.3;
+// var EASE_CENTER_RESTORE = 0.015;
+// var EASE_CENTER_FOLLOW_MIN = 0.04;
+// var EASE_CENTER_FOLLOW_MAX = 0.01;
+//
 var EASE_ORBIT_LOADER = 0.003; // 
 var EASE_CENTER_LOADER = 0.03;
+// EASE_ORBIT_EXIT_LOADER = 0.1;
+// EASE_CENTER_EXIT_LOADER = 0.1;
+//
+var PLUCK_FRAME_MAX = 2;
+
+// var TRAIL_OPAC_MIN = 0.04;
+// var TRAIL_OPAC_MAX = 0.5;
+// var TRAIL_FADEOUT = 0.6;
+// var TRAIL_PTS = 24;
+// var TRAIL_SAMPLE = 4;
 
 var Nub = function(ind,indAll, machine,wheel, canvas) {
     this.xp0;
@@ -18,6 +40,7 @@ var Nub = function(ind,indAll, machine,wheel, canvas) {
     this.ind = ind; 
     this.indAll = indAll;
     this.cv = canvas;
+
     this.xpOrbit = this.xpOrbitTarg = this.wheel.xp;
     this.ypOrbit = this.ypOrbitTarg = this.wheel.yp;
     this.orbit = this.orbitTarg = WHEEL_RADIUS;
@@ -29,6 +52,10 @@ var Nub = function(ind,indAll, machine,wheel, canvas) {
     this.velY = 0;
 
     this.dampVel = 0.93;
+    // this.arrTrail = new Array(TRAIL_PTS);
+
+    this.frameCt = this.indAll;
+    this.spd = 0;
 
     this.hasEntered = false;
 
@@ -44,8 +71,41 @@ Nub.prototype.upd = function() {
         return
     }
     this.updPos();
-    //TODO: this.updInteract();
+    this.updInteract();
 }
+
+Nub.prototype.updInteract = function() {
+    if (this.isFirstRun) {
+        this.isFirstRun = false;
+        return;
+    }
+    if (this.spd > SPD_IGNORE_MAX) {
+        return;
+    }
+    var a, c, d;
+    var f = 0;
+    for (var b = 0; b < this.m.arrThreads.length; b++) {
+        d = this.m.arrThreads[b];
+        var e = lineIntersect(this.pt0, this.pt1, d.pt0, d.pt1);
+        if (e == null) {
+            continue
+        }
+        a = e.x;
+        c = e.y;
+        if ((!d.isGrabbed) && (!isNaN(a)) && (!isNaN(c))) {
+            if (this.spd > SPD_GRAB) {
+                d.pluck(a, c, true, this);
+                f++;
+                if (f > PLUCK_FRAME_MAX) {
+                    break
+                }
+            } else {
+                d.grab(a, c, true, this);
+                break
+            }
+        }
+    }
+};
 
 Nub.prototype.updPos = function() {
     this.t1 = (new Date()).getTime() / 1000;

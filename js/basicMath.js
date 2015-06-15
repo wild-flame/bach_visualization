@@ -85,6 +85,7 @@ var lineIntersect = function(e, b, o, n) {
     }
     return new Point(j, m)
 };
+
 var Point = function(b, a) {
     this.x = b;
     this.y = a

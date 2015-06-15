@@ -10,6 +10,10 @@ var MIN_LENGTH = MAX_LENGTH * Math.pow(HALF_STEP_MULTIPLIER, TOTAL_NOTES - 1);
 var SHOW_FRAMERATE = true;
 var mouseX = 0, mouseY= 0;
 
+var TOTAL_NOTES_IN_SONG = SONG_DATA_ARRAY.length;
+
+var SPD_IGNORE_MAX = 80;
+var SPD_GRAB = 4;
 
 var MIDI_MAP = {
     "36": 0,
@@ -50,6 +54,9 @@ var MIDI_MAP = {
     "71": 35,
     "72": 36
 };
+
+/* ---------------- SOUND MANAGER -------------------*/
+
 
 soundManager.url = "/lib/swf/"
 soundManager.flashVersion = 9;
@@ -96,6 +103,18 @@ suite.smLoadedAll = function() { //when all note is ready
     suite.everythingIsReady()
 };
 
+suite.smPlayNote = function(d, c, b) { //soundmanager play note
+    var a = soundManager.getSoundById("note" + d);
+    if (a == null) {
+        return
+    }
+    a.play({
+        volume: 100 * c,
+        pan: 100 * b
+    })
+};
+/* ---------------- MAIN FUNCTION -------------------*/
+
 suite.everythingIsReady = function() {
     if(suite.ready) {
         return
@@ -104,16 +123,6 @@ suite.everythingIsReady = function() {
     suite.machine.doneLoading();
 };
 
-suite.initMidiMap = function() {
-    suite.arrMidiMap = new Array();
-    var a;
-    for (key in MIDI_MAP) {
-        a = parseInt(key);
-        suite.arrMidiMap[a] = MIDI_MAP[key];
-    }
-};
-
-//
 suite.init = function() { 
     suite.ready = false;
     suite.initMidiMap();
@@ -139,21 +148,29 @@ suite.init = function() {
     suite.canvasEl = document.getElementById("main-canvas");
     suite.canvasObj = suite.canvasEl.getContext("2d");
     suite.machine = new Machine(suite.canvasObj);
-    // suite.indNoteLd = 0;
+    suite.indNoteLd = 0;
     rsize();
     suite.machine.build();
     suite.machine.beginLoading();
     setInterval(updateLoop, UPDATE_INTERVAL);
 };
 
-var updateLoop = function() {
-    suite.machine.upd();
+suite.initMidiMap = function() {
+    suite.arrMidiMap = new Array();
+    var a;
+    for (key in MIDI_MAP) {
+        a = parseInt(key);
+        suite.arrMidiMap[a] = MIDI_MAP[key];
+    }
 };
 
+/* ---------------- GLOBAL FUNCTION -------------------*/
+
+
+//This function will be called onload() of the BODY element.
 var init = function() {
     suite.init();
 }
-
 
 var rsize = function() {
     width = window.innerWidth;
@@ -162,3 +179,9 @@ var rsize = function() {
         suite.machine.rsize();
     }  
 };
+
+var updateLoop = function() {
+    suite.machine.upd();
+};
+
+

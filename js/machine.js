@@ -1,4 +1,3 @@
-
 // THREAD parameters
 var TOTAL_THREADS = 8;
 var NUBS = 4;
@@ -13,6 +12,8 @@ var WHEEL_QUARTER_SEG = Math.sqrt(2 * WHEEL_RADIUS_SQUARED);
 var HEIGHT_ALL_THREADS = WHEEL_QUARTER_SEG;
 
 // LOADING 
+// var THREAD_LOADER = 0;
+//
 var TIME_BETWEEN_LOAD = 0.25;
 var LOAD_TIME_OVERALL = 12.5;
 
@@ -22,6 +23,9 @@ var NOTE_UNIT = 2;
 // CLEAR_RECT
 var CLEAR_RECT_MARG = 50;
 
+// FPS_BACKGROUND 
+// var FPS_BACKGROUND = 2;
+
 var Machine = function(canvasObj) {
     this.cv = canvasObj;
 
@@ -30,13 +34,36 @@ var Machine = function(canvasObj) {
     this.arrNubs = new Array(NUBS);
     this.arrPitchStart = new Array(TOTAL_THREADS);
 
-    this.elmLoader = document.getElementById("loader");
-    this.elmAbout = document.getElementById("about");
+    // this.rSpd = 0;
+    // this.rSpdAvg = 0;
+    // this.fAvg = 5;
 
+    this.setTempo(BPM_NORM);  
+
+    // this.rSpdGrab = 0.4;
+    //
+    this.xp0;
+    this.yp0;
+    this.xp1;
+    this.yp1;
     this.pt0 = new Point();
     this.pt1 = new Point();
 
-    this.setTempo(BPM_NORM);  
+    this.isFirstRun = true;
+    this.wasResized = false;
+    // this.isHodingNub = false;
+    // this.nubOver = null;
+    // this.indGroup = 0;
+    // this.ctGrab = 0;
+    // this.pluckMax = 2;
+    this.indThreadLoader = 0;
+
+    this.isIntro = true;
+    this.isIntroDone = false;
+
+    this.noteSondRdPrev = 0;
+    this.threadsInPlace = false;
+    // this.isInBackground = false;
 
     this.xbLimitMin = -MAX_LENGTH * 0.5;
     this.xbLimitMax = MAX_LENGTH * 0.5;
@@ -47,33 +74,31 @@ var Machine = function(canvasObj) {
     this.ybMin = this.ybLimitMin;
     this.ybMax = this.ybLimitMax;
 
-    this.isIntro = true;
-    this.isIntroDone = false;
-
-
+    this.init()
 }
 
 Machine.prototype.init = function() {
-    // this.elmLoader = document.getElementById("loader");
-    // this.elmAbout = document.getElementById("about");
+    this.elmLoader = document.getElementById("loader");
+    this.elmAbout = document.getElementById("about");
 };
 
 Machine.prototype.build = function() {
     this.setOrigin(); //设置起点
-    var f = MAX_LENGTH; 
+    var curTLength = MAX_LENGTH; 
     for (var e = 0; e < TOTAL_NOTES; e++) {
-        this.arrLength[e] = f;
-        f *= HALF_STEP_MULTIPLIER
+        this.arrLength[e] = curTLength;
+        curTLength *= HALF_STEP_MULTIPLIER
     }
-    var g, h, d, c;
+    var g, h, threadColor, c;
     var j = WHEEL_QUARTER_SEG / TOTAL_THREADS;
     var a = (TOTAL_THREADS / 2) * j - 0.5 * j;
     for (var e = 0; e < TOTAL_THREADS; e++) {
         this.arrPitchStart[e] = suite.arrMidiMap[SONG_DATA_ARRAY[e]];
-        d = "#FFFFFF";
+        threadColor = "#FFFFFF";
         h = 3;
         var c = -1;
-        var b = new Thread(a, c, h, d, e, this.cv); // a: y position, c = -1, h = 3
+        var b = new Thread(a, c, h, threadColor, e, this.cv); // a: y position, c = -1, h = 3
+        // var Thread = function(yPostion, pitchInd, str, hex, ind, canvas) 
         a = a - j;
         this.arrThreads.push(b)
     }
@@ -83,6 +108,9 @@ Machine.prototype.build = function() {
     this.arrNubs[1] = this.wheel0.nub1 = new Nub(1, 1, suite.machine, this.wheel0, this.cv); //第二个球
     this.arrNubs[2] = this.wheel1.nub0 = new Nub(0, 2, suite.machine, this.wheel1, this.cv); //第三个球
     this.arrNubs[3] = this.wheel1.nub1 = new Nub(1, 3, suite.machine, this.wheel1, this.cv); //第四个球
+
+    this.cv.globalCompositeOperation = "lighter";
+
 
     this.arrNubs[0].enter();
 };
@@ -98,6 +126,14 @@ Machine.prototype.doneLoading = function() {
     if (!SHOW_FRAMERATE) {
         this.elmLoader.style.display = "none";
     }
+};
+
+Machine.prototype.exitLoading = function() {
+    this.isIntro = false;
+    for (var a = 0; a < this.arrNubs.length; a++) {
+        this.arrNubs[a].exitLoader();
+    }
+    this.updThreads();
 };
 
 Machine.prototype.getUserX = function() {
@@ -132,11 +168,74 @@ Machine.prototype.incrLoad = function() {
             l.enter()
         }
     }
-}
-
-Machine.prototype.setTempo = function(a) {
+    var j = 0.4;
+    var h = 0.8;
+    var e;
+    if (this.rLoad < j) {
+        e = 0
+    } else {
+        e = (this.rLoad - j) / (h - j);
+        if (e > 1) {
+            e = 1
+        }
+    }
+    var k = e * TOTAL_THREADS;
+    var d = Math.floor((Math.random() * 0.999) * k);
+    var a, m, b;
+    var f = 0;
+    for (var g = 0; g < TOTAL_THREADS; g++) {
+        if (g > k) {
+            break
+        }
+        a = this.arrPitchStart[d];
+        b = this.arrThreads[d];
+        if (b.pitchInd == a) {
+            d = (d + 1) % TOTAL_THREADS;
+            f++
+        } else {
+                var c;
+                if (k == 0) {
+                    c = 1
+                } else {
+                    c = 1 + Math.round(Math.random() * 2)
+                }
+                off = Math.floor(lerp(-3, 0, this.rLoad));
+                m = b.pitchInd + c + off;
+                if (m < 0) {
+                    m = 0
+                }
+                if (m > a) {
+                    m = a
+                }
+                if ((suite.indNoteLd > 0) && (suite.indNoteLd - 1 >= m)) {
+                    b.setTargetPitch(m);
+                    break
+                }
+            }
+    }
+    if ((f == TOTAL_THREADS) && !this.threadsInPlace) {
+        this.threadsInPlace = true
+    }
+    if (this.threadsInPlace && suite.soundReady && this.rLoad >= 1 && !this.isIntroDone) {
+        console.log("isIntroDone true!");
+        this.isIntroDone = true
+    }
+};Machine.prototype.setTempo = function(a) {
     this.bpm = a;
     this.bps = a / 60
+};
+
+Machine.prototype.setGroup = function(indGroup) { 
+    this.indGroup = indGroup;
+    for (var a = 0; a< this.arrThreads.length; a++) {
+        var b = SONG_DATA_ARRAY[this.indGroup + a];
+        if (b == -1) {
+            pitch = -1
+        } else {
+            pitch = suite.arrMidiMap[b];
+        }
+        this.arrThreads[a].setTargetPitch(pitch);
+    }
 };
 
 Machine.prototype.upd = function() { //update
@@ -155,7 +254,7 @@ Machine.prototype.upd = function() { //update
     this.updWheels(); //update wheels
     // this.cv.clearRect(this.xo + this.xbMin - CLEAR_RECT_MARG, this.yo + this.ybMin - CLEAR_RECT_MARG, this.xbMax - this.xbMin + CLEAR_RECT_MARG * 2, this.ybMax - this.ybMin + CLEAR_RECT_MARG * 2); //clear screen
     this.cv.clearRect(0,0,window.innerWidth,window.innerHeight);
-    //this.updateAndRedrawThreads(); //琴弦
+    this.updateAndRedrawThreads(); //琴弦
     this.redrawNubs(); //球
 }
 
@@ -203,6 +302,7 @@ Machine.prototype.updLoading = function() {
     this.incrLoad();
 }
 
+
 Machine.prototype.rsize = function() {
     this.wasResized = true;
     this.width = suite.canvasEl.width = window.innerWidth;
@@ -214,10 +314,6 @@ Machine.prototype.rsize = function() {
     this.setOrigin()
 };
 
-Machine.prototype.setOrigin = function() { 
-    this.xo = Math.round(this.width / 2);
-    this.yo = Math.round(this.height / 2)
-};
 
 Machine.prototype.updTime = function() {
     this.t1 = (new Date()).getTime() / 1000;
@@ -267,4 +363,42 @@ Machine.prototype.redrawNubs = function() {
     this.wheel0.nub1.redraw();
     this.wheel1.nub0.redraw();
     this.wheel1.nub1.redraw()
+};
+
+Machine.prototype.updThreads = function() {
+    for (var a = 0; a< this.arrThreads.length; a++) {
+        this.arrThreads[a].upd()
+    }
+};
+
+Machine.prototype.redrawThreads = function() {
+    for (var a = 0; a < this.arrThreads.length; a++) {
+        this.arrThreads[a].redraw();
+    }
+};
+
+Machine.prototype.updateAndRedrawThreads = function() {
+    for (var a = 0; a < this.arrThreads.length; a++) {
+        this.arrThreads[a].upd();
+        this.arrThreads[a].redraw()
+    }
+};
+
+Machine.prototype.setOrigin = function() { 
+    this.xo = Math.round(this.width / 2);
+    this.yo = Math.round(this.height / 2)
+};
+
+Machine.prototype.xAsRatio = function(a) {
+    a = lim(a, 0, this.width);
+    return a / this.width;
+};
+
+Machine.prototype.checkMoving = function() {
+    var b = 0;
+    for (var a = 0; a < this.arrThreads.length; a++) {
+        if (this.arrThreads[a].isOsc) {
+            b++
+        }
+    }
 };
