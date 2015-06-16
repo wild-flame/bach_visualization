@@ -3,6 +3,11 @@ var UPDATE_INTERVAL = 33;
 var TOTAL_NOTES = 38;
 var HALF_STEP_MULTIPLIER = 0.94921875;
 
+var MOUSE_SPEED_MIN = 70;
+var MOUSE_SPEED_MAX = 1500;
+var MOUSE_SPEED_RATIO_GRAB = 0.4;
+var MOUSE_AVERAGE_COUNT = 5;
+
 var BPM_NORM = 145; //music speed (machine speed)
 
 var MAX_LENGTH = 590;
@@ -14,6 +19,8 @@ var TOTAL_NOTES_IN_SONG = SONG_DATA_ARRAY.length;
 
 var SPD_IGNORE_MAX = 80;
 var SPD_GRAB = 4;
+
+var MATH_PI = Math.PI;
 
 var MIDI_MAP = {
     "36": 0,
@@ -79,7 +86,6 @@ suite.smLoadSound = function(count) {
         multiShotEvents: false,
         onload: function() {
             this.play();
-            console.log("ahcInd:")
             suite.smLoadedSnd(this["ahcInd"]) 
         }
     });

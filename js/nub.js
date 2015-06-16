@@ -135,7 +135,7 @@ Nub.prototype.updPos = function() {
         this.isTossing = false;
     }
     if (this.isTossing) {
-        this.setPos(this.xpv, this,ypv);
+        this.setPos(this.xpv, this.ypv);
         this.xpOrbit = this.xpv;
         this.ypOrbit = this.ypv;
         this.orbit = 0;

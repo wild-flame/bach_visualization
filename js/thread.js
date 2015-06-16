@@ -12,7 +12,7 @@ var VOLUME_MAX = 0.7;
 var PAN_LEFT = -0.3;
 var PAN_RIGHT = 0.3;
 
-
+/*============== INITIALIZE ===============*/
 var Thread = function(f, pitchInd, str, hex, ind, canvas) {  // f: y position
     this.pt0 = new Point(0, 0);
     this.pt1 = new Point(0, 0);
@@ -80,29 +80,8 @@ Thread.prototype.init = function() {
     this.updPos();
 }
 
-Thread.prototype.setTargetPitch = function(a) {
-    if (a == -1) {
-        this.pitchInd = -1;
-        var b = 0;
-    } else {
-        this.pitchInd = 0;
-        this.rPitch = this.pitchInd / (TOTAL_NOTES - 1);
-        var b = this.m.arrLength[this.pitchInd];
-    }
-    if (b != this.len) {
-        this.easeToLength(b);
-    }
-};
+/*============== UPDATE ===============*/
 
-Thread.prototype.setLength = function(a) {
-    this.len = a;
-    this.updPos()
-};
-
-Thread.prototype.easeToLength = function(a) {
-    this.isShifting = true;
-    this.lenTarg = a
-};
 
 Thread.prototype.upd = function() {
     if (this.isShifting) {
@@ -340,4 +319,31 @@ Thread.prototype.playNote = function(c, a) {
     var b = this.pitchInd < 10 ? "0" : "";
     suite.smPlayNote(this.pitchInd, VOLUME_MIN + c * (VOLUME_MAX - VOLUME_MIN), PAN_LEFT + a * (PAN_RIGHT - PAN_LEFT))
 };
+
+/*============== METHOD ===============*/
+
+Thread.prototype.setTargetPitch = function(a) {
+    if (a == -1) {
+        this.pitchInd = -1;
+        var b = 0;
+    } else {
+        this.pitchInd = a;
+        this.rPitch = this.pitchInd / (TOTAL_NOTES - 1);
+        var b = this.m.arrLength[this.pitchInd];
+    }
+    if (b != this.len) {
+        this.easeToLength(b);
+    }
+};
+
+Thread.prototype.setLength = function(a) {
+    this.len = a;
+    this.updPos()
+};
+
+Thread.prototype.easeToLength = function(a) {
+    this.isShifting = true;
+    this.lenTarg = a
+};
+
 

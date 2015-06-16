@@ -96,3 +96,13 @@ Point.prototype.setX = function(a) {
 Point.prototype.setY = function(a) {
     this.y = a
 };
+
+function objToString (obj) {
+    var str = '';
+    for (var p in obj) {
+        if (obj.hasOwnProperty(p)) {
+            str += p + '::' + obj[p] + '<br>';
+        }
+    }
+    return str;
+}

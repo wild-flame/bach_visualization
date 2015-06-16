@@ -12,7 +12,7 @@ var WHEEL_QUARTER_SEG = Math.sqrt(2 * WHEEL_RADIUS_SQUARED);
 var HEIGHT_ALL_THREADS = WHEEL_QUARTER_SEG;
 
 // LOADING 
-// var THREAD_LOADER = 0;
+var THREAD_LOADER = 0;
 //
 var TIME_BETWEEN_LOAD = 0.25;
 var LOAD_TIME_OVERALL = 12.5;
@@ -64,6 +64,7 @@ var Machine = function(canvasObj) {
     this.noteSondRdPrev = 0;
     this.threadsInPlace = false;
     // this.isInBackground = false;
+    //
 
     this.xbLimitMin = -MAX_LENGTH * 0.5;
     this.xbLimitMax = MAX_LENGTH * 0.5;
@@ -80,6 +81,7 @@ var Machine = function(canvasObj) {
 Machine.prototype.init = function() {
     this.elmLoader = document.getElementById("loader");
     this.elmAbout = document.getElementById("about");
+    this.elmDebug = document.getElementById("debug");
 };
 
 Machine.prototype.build = function() {
@@ -168,19 +170,20 @@ Machine.prototype.incrLoad = function() {
             l.enter()
         }
     }
+
     var j = 0.4;
     var h = 0.8;
     var e;
-    if (this.rLoad < j) {
+    if (this.rLoad < j) { // LOAD percentaget < j
         e = 0
-    } else {
-        e = (this.rLoad - j) / (h - j);
+    } else { 
+        e = (this.rLoad - j) / (h - j); // j < LOAD percentage < h
         if (e > 1) {
             e = 1
         }
     }
-    var k = e * TOTAL_THREADS;
-    var d = Math.floor((Math.random() * 0.999) * k);
+    var k = e * TOTAL_THREADS; // 
+    var d = Math.floor((Math.random() * 0.999) * k); //(0 - 0.999) * e * 8
     var a, m, b;
     var f = 0;
     for (var g = 0; g < TOTAL_THREADS; g++) {
@@ -220,7 +223,9 @@ Machine.prototype.incrLoad = function() {
         console.log("isIntroDone true!");
         this.isIntroDone = true
     }
-};Machine.prototype.setTempo = function(a) {
+};
+
+Machine.prototype.setTempo = function(a) {
     this.bpm = a;
     this.bps = a / 60
 };
@@ -266,6 +271,8 @@ Machine.prototype.updFramerate = function() {
     if(this.ctFrame % 5 == 0) {
         this.numFrame = Math.round(100 / a) / 100;
         this.elmLoader.innerHTML = '<span class="loading">' + this.numFrame + "</span> &nbsp; "
+        this.elmDebug.innerHTML = '<p>WHEEL1'+objToString(this.wheel0)+'</p></br></br>'
+        + '<p>Arrthread[0]:'+objToString(this.arrThreads[0])+'</p>';
     }
 };
 
@@ -309,6 +316,10 @@ Machine.prototype.rsize = function() {
     this.height = suite.canvasEl.height = window.innerHeight;
     this.elmLoader.style.left = "20px";
     this.elmLoader.style.top = (this.height - 32) + "px";
+    // if (DEBUG_MODE == true) {
+    this.elmDebug.style.left = "20px";
+    this.elmDebug.style.top = "20px";
+    // }
     this.elmAbout.style.left = (this.width - 50) + "px";
     this.elmAbout.style.top = (this.height - 32) + "px";
     this.setOrigin()
@@ -399,6 +410,14 @@ Machine.prototype.checkMoving = function() {
     for (var a = 0; a < this.arrThreads.length; a++) {
         if (this.arrThreads[a].isOsc) {
             b++
+        }
+    }
+};
+
+Machine.prototype.dropAll = function() {
+    for (var a = 0; a < this.arrThreads.length; a++) {
+        if (this.arrThreads[a].isGrabbed) {
+            this.arrThreads[a].drop()
         }
     }
 };

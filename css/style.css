@@ -13,6 +13,13 @@
 }
 
 canvas#main-canvas {
-  background: #b02e2e;
+    background: #b02e2e;
+}
+
+#debug {
+    position: absolute;
+    font-weight: bold;
+    font-size: 12px;
+    color: #000000;
 }
 
